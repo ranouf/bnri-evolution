@@ -2,11 +2,18 @@
 
 Extension Chrome destinée au portail [MonPortefeuille+ de BNRI](https://monportefeuilleplus.ca/nbin/home), basée sur les outils de Manuvie Évolution.
 
-## État du projet
+## Fonctions
 
-Le socle technique est disponible : moteur de calcul, tests, empaquetage et workflows GitHub Actions. L'analyse du portail authentifié doit encore permettre d'intégrer les données BNRI et de créer une interface proche de celle du portail. L'extension n'affiche pas encore de panneau.
+L'extension ajoute au portail authentifié un panneau inspiré de l'identité visuelle de MonPortefeuille+. Elle analyse localement les données déjà accessibles dans la session :
 
-Fonctions prévues : gains cumulés, rendements par année et frais. Les résultats dépendront des historiques et des données réellement fournis par BNRI.
+- valeur et capital net, consolidés et par compte ;
+- gains cumulés et rendements estimés ;
+- synthèse annuelle sur 24 mois ;
+- frais et cotisations détectés ;
+- répartition de la valeur par compte ;
+- neutralisation des transferts internes dans la vue consolidée.
+
+Aucune donnée financière ni information d'authentification n'est transmise hors du portail.
 
 ## Validation locale
 
@@ -29,7 +36,7 @@ Le script `ci-build.ps1` exécute également ces étapes sous Windows.
 npm run build
 ```
 
-Les fichiers `dist/bnri-evolution-0.1.0.zip` et `dist/bnri-evolution-0.1.0-chrome-store.zip` contiennent uniquement le manifeste, le moteur de calcul et la politique de confidentialité.
+Les fichiers `dist/bnri-evolution-0.1.0.zip` et `dist/bnri-evolution-0.1.0-chrome-store.zip` contiennent le manifeste, l'analyse locale, l'interface et la politique de confidentialité.
 
 ## CI/CD
 
@@ -47,7 +54,7 @@ Secrets requis dans le dépôt :
 - `CHROME_CLIENT_SECRET`
 - `CHROME_REFRESH_TOKEN`
 
-Les quatre derniers peuvent être repris du compte éditeur existant si leurs autorisations couvrent la nouvelle extension. L'identifiant de l'extension Manuvie ne doit pas être réutilisé.
+Chaque secret est propre à la fiche ou au projet de publication BNRI Évolution.
 
 ```sh
 npm run chrome-store:dry-run

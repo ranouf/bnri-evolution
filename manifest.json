@@ -3,10 +3,25 @@
   "name": "BNRI Évolution",
   "version": "0.1.0",
   "description": "Analyse des gains, rendements et frais du portail MonPortefeuille+ de BNRI.",
+  "icons": {
+    "128": "assets/icon128.png"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://monportefeuilleplus.ca/*",
+    "https://iiroc.investments.apis.monportefeuilleplus.ca/*"
+  ],
   "content_scripts": [
     {
       "matches": ["https://monportefeuilleplus.ca/nbin/*"],
-      "js": ["src/analytics.js"],
+      "js": ["src/network-bridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://monportefeuilleplus.ca/nbin/*"],
+      "js": ["src/analytics.js", "src/content.js"],
+      "css": ["src/styles.css"],
       "run_at": "document_start"
     }
   ]

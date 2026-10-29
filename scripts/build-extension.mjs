@@ -4,7 +4,15 @@ import yazl from "yazl";
 
 const manifest = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
 const outputDirectory = "dist";
-const files = ["manifest.json", "PRIVACY.md", "src/analytics.js"];
+const files = [
+  "assets/icon128.png",
+  "manifest.json",
+  "PRIVACY.md",
+  "src/analytics.js",
+  "src/content.js",
+  "src/network-bridge.js",
+  "src/styles.css",
+];
 
 fs.mkdirSync(outputDirectory, { recursive: true });
 for (const suffix of ["", "-chrome-store"]) {
