@@ -6,7 +6,6 @@
   "icons": {
     "128": "assets/icon128.png"
   },
-  "permissions": ["storage"],
   "host_permissions": [
     "https://monportefeuilleplus.ca/*",
     "https://iiroc.investments.apis.monportefeuilleplus.ca/*"
