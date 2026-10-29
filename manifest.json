@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "BNRI Évolution",
+  "version": "0.1.0",
+  "description": "Analyse des gains, rendements et frais du portail MonPortefeuille+ de BNRI.",
+  "content_scripts": [
+    {
+      "matches": ["https://monportefeuilleplus.ca/nbin/*"],
+      "js": ["src/analytics.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
