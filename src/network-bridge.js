@@ -40,7 +40,6 @@
   const routePayload = (url, payload, requestId = null) => {
     if (!payload || typeof payload !== "object") return;
     emit(url, payload, requestId);
-    emitProgress("activity", "done", new URL(url).pathname);
   };
 
   class ObservedXHR extends NativeXHR {

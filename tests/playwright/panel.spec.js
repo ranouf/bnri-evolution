@@ -80,6 +80,19 @@ test("affiche le tableau de bord BNRI avec des données de portefeuille", async 
       },
       "history",
     );
+
+    window.postMessage(
+      {
+        detail: {
+          detail: "/orion-api/v1/1/accounts/history/",
+          id: "activity",
+          status: "done",
+        },
+        source: "bnri-evolution-page",
+        type: "progress",
+      },
+      location.origin,
+    );
   });
 
   await page.getByRole("button", { name: "Ouvrir BNRI Évolution" }).click();
@@ -90,6 +103,7 @@ test("affiche le tableau de bord BNRI avec des données de portefeuille", async 
   await expect(page.getByRole("heading", { name: "Rendements annuels" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Valeur par compte" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "CELI" })).toBeVisible();
+  await expect(page.getByText("/orion-api/v1/1/accounts/history/")).toHaveCount(0);
 
   fs.mkdirSync(".codex", { recursive: true });
   await page.screenshot({ path: ".codex/bnri-panel-final.png" });

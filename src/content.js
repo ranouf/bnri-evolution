@@ -183,7 +183,7 @@
   const receive = ({ data, requestId, url }) => {
     const payload = unwrap(data);
     if (data?.__bnriError) {
-      state.progress = data.__bnriError;
+      state.progress = "Certaines données ne sont pas disponibles pour le moment.";
       render();
       return;
     }
@@ -305,7 +305,9 @@
         return;
       if (event.data.type === "api-response") receive(event.data.detail);
       if (event.data.type === "progress") {
-        state.progress = event.data.detail.detail;
+        const detail = event.data.detail.detail;
+        if (String(detail ?? "").startsWith("/")) return;
+        state.progress = detail;
         render();
       }
     });
