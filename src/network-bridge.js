@@ -4,10 +4,9 @@
   const API_ORIGIN = "https://iiroc.investments.apis.monportefeuilleplus.ca/";
   const PAGE_SOURCE = "bnri-evolution-page";
   const CONTENT_SOURCE = "bnri-evolution-content";
-  const NativeXHR = window.XMLHttpRequest;
   const nativeFetch = window.fetch.bind(window);
   const recentResponses = [];
-  const sessionHeaders = new Headers({ Accept: "application/json" });
+  const observedSummaries = new Set();
 
   const emit = (url, data, requestId = null) => {
     const detail = { data, requestId, url };
@@ -22,79 +21,33 @@
       location.origin,
     );
 
-  const rememberHeader = (name, value) => {
-    if (["authorization", "language", "site-code"].includes(name.toLowerCase())) {
-      sessionHeaders.set(name, value);
-    }
-  };
-
-  const parseJson = (value) => {
-    if (typeof value !== "string" || !value.trim()) return null;
-    try {
-      return JSON.parse(value);
-    } catch {
-      return null;
-    }
-  };
-
   const routePayload = (url, payload, requestId = null) => {
     if (!payload || typeof payload !== "object") return;
     emit(url, payload, requestId);
-  };
-
-  class ObservedXHR extends NativeXHR {
-    constructor() {
-      super();
-      this.__bnriUrl = "";
-      this.addEventListener("load", () => {
-        if (!this.__bnriUrl.startsWith(API_ORIGIN) || this.status >= 400) return;
-        const payload =
-          this.responseType === "json"
-            ? this.response
-            : this.responseType === "" || this.responseType === "text"
-              ? parseJson(this.responseText)
-              : null;
-        routePayload(this.__bnriUrl, payload);
-      });
-    }
-
-    open(method, url, ...rest) {
-      this.__bnriUrl = new URL(String(url), location.href).href;
-      return super.open(method, url, ...rest);
-    }
-
-    setRequestHeader(name, value) {
-      rememberHeader(name, value);
-      return super.setRequestHeader(name, value);
-    }
-  }
-
-  window.XMLHttpRequest = ObservedXHR;
-  window.fetch = async (...args) => {
-    const input = args[0];
-    const url = new URL(typeof input === "string" ? input : input.url, location.href).href;
-    const headers = new Headers(args[1]?.headers ?? input?.headers ?? {});
-    for (const [name, value] of headers) rememberHeader(name, value);
-    const response = await nativeFetch(...args);
-    if (url.startsWith(API_ORIGIN)) {
-      response
-        .clone()
-        .json()
-        .then((payload) => routePayload(url, payload))
-        .catch(() => undefined);
-    }
-    return response;
   };
 
   const requestJson = async (url, requestId) => {
     if (!url.startsWith(API_ORIGIN)) throw new Error("Adresse API non autorisée");
     const response = await nativeFetch(url, {
       credentials: "include",
-      headers: sessionHeaders,
+      headers: { Accept: "application/json" },
     });
     if (!response.ok) throw new Error(`API ${response.status}`);
     routePayload(url, await response.json(), requestId);
   };
+
+  new PerformanceObserver((list) => {
+    for (const { name } of list.getEntries()) {
+      if (
+        !name.startsWith(API_ORIGIN) ||
+        !new URL(name).pathname.endsWith("/portfolios/summary") ||
+        observedSummaries.has(name)
+      )
+        continue;
+      observedSummaries.add(name);
+      requestJson(name, null).catch((error) => emit(name, { __bnriError: error.message }));
+    }
+  }).observe({ type: "resource", buffered: true });
 
   window.addEventListener("message", (event) => {
     if (
