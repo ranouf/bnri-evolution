@@ -9,6 +9,7 @@ const files = [
   "manifest.json",
   "PRIVACY.md",
   "src/analytics.js",
+  "src/csv.js",
   "src/content.js",
   "src/network-bridge.js",
   "src/styles.css",
