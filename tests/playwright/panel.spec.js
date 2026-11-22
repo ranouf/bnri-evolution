@@ -10,6 +10,7 @@ test("affiche le tableau de bord BNRI avec des données de portefeuille", async 
   await page.goto("https://monportefeuilleplus.ca/nbin/home");
   await page.addStyleTag({ path: path.resolve("src/styles.css") });
   await page.addScriptTag({ path: path.resolve("src/analytics.js") });
+  await page.addScriptTag({ path: path.resolve("src/csv.js") });
   await page.addScriptTag({ path: path.resolve("src/content.js") });
 
   await page.evaluate(() => {
@@ -105,6 +106,34 @@ test("affiche le tableau de bord BNRI avec des données de portefeuille", async 
   await expect(page.getByRole("heading", { name: "CELI" })).toBeVisible();
   await expect(page.getByText("/orion-api/v1/1/accounts/history/")).toHaveCount(0);
 
-  fs.mkdirSync(".codex", { recursive: true });
-  await page.screenshot({ path: ".codex/bnri-panel-final.png" });
+  const exportButton = page.getByRole("button", { name: "Télécharger les opérations (CSV)" });
+  await expect(exportButton).toBeEnabled();
+  await exportButton.scrollIntoViewIfNeeded();
+  fs.mkdirSync(".vs", { recursive: true });
+  await page.screenshot({ path: ".vs/bnri-export.png" });
+  await page.setViewportSize({ width: 375, height: 812 });
+  await exportButton.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: ".vs/bnri-export-mobile.png" });
+  await page.evaluate(() =>
+    window.postMessage(
+      {
+        detail: {
+          data: { data: { activityList: [] } },
+          requestId: null,
+          url: "https://iiroc.investments.apis.monportefeuilleplus.ca/orion-api/v1/1/accounts/history?period=ONE_MONTH",
+        },
+        source: "bnri-evolution-page",
+        type: "api-response",
+      },
+      location.origin,
+    ),
+  );
+  await expect(page.getByText("0 opération(s) analysée(s)")).toBeVisible();
+  const downloadPromise = page.waitForEvent("download");
+  await exportButton.click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^\d{8}_BNRI_Transactions\.csv$/);
+  const csv = fs.readFileSync(await download.path(), "utf8");
+  expect(csv).toContain('"BNRI","100W","Cotisation"');
+  expect(csv).not.toContain("gain");
 });

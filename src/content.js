@@ -22,6 +22,7 @@
   const state = {
     accounts: [],
     history: [],
+    exportHistory: null,
     open: false,
     planAccounts: new Map(),
     progress: "Connexion au portail…",
@@ -180,6 +181,23 @@
     }
   };
 
+  const startExport = () => {
+    const rows = state.exportHistory.map((item) => ({
+      date: (item.tradeDt ?? item.processingDt ?? item.settlementDt ?? "").slice(0, 10),
+      institution: "BNRI",
+      compte: accountNumber(item),
+      type: item.activityType,
+      description: descriptionOf(item),
+      montant: item.netAmount,
+      devise: item.account?.acctCurrCd,
+      titre: item.finInstrument?.displayDesc,
+      quantite: item.qty,
+      prix_unitaire: item.price,
+      frais: item.commissionAmount,
+    }));
+    globalThis.PortfolioCsv.download(globalThis.PortfolioCsv.filename("BNRI"), rows);
+  };
+
   const receive = ({ data, requestId, url }) => {
     const payload = unwrap(data);
     if (data?.__bnriError) {
@@ -189,6 +207,7 @@
     }
     if (requestId === "history" || url.includes("/accounts/history")) {
       state.history = payload.activityList ?? [];
+      if (requestId === "history") state.exportHistory = state.history;
       state.progress = `${state.history.length} opération(s) analysée(s)`;
     } else if (requestId?.startsWith("plan:")) {
       state.planAccounts.set(requestId.slice(5), payload);
@@ -278,7 +297,7 @@
     root.classList.toggle("be-open", state.open);
     root.innerHTML = `<button class="be-launch" type="button" aria-label="Ouvrir BNRI Évolution"><span class="be-mark">B</span><span><strong>BNRI</strong><small>ÉVOLUTION</small></span></button>
       <aside class="be-panel" aria-label="BNRI Évolution" ${state.open ? "" : "hidden"}>
-        <header><div class="be-brand"><span class="be-mark">B</span><div><strong>BNRI Évolution</strong><small>Analyse de portefeuille</small></div></div><button class="be-close" type="button" aria-label="Fermer">×</button></header>
+        <header><div class="be-brand"><span class="be-mark">B</span><div><strong>BNRI Évolution</strong><small>Analyse de portefeuille</small></div></div><div class="be-header-actions"><button class="be-export" type="button" aria-label="Télécharger les opérations (CSV)" title="Télécharger les opérations des 24 derniers mois (CSV)" ${state.exportHistory ? "" : "disabled"}><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg></button><button class="be-close" type="button" aria-label="Fermer">×</button></div></header>
         ${panel()}
       </aside>`;
     root.querySelector(".be-launch")?.addEventListener("click", () => {
@@ -289,6 +308,7 @@
       state.open = false;
       render();
     });
+    root.querySelector(".be-export")?.addEventListener("click", startExport);
   };
 
   const mount = () => {

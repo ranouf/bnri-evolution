@@ -15,6 +15,12 @@ L'extension ajoute au portail authentifié un panneau inspiré de l'identité vi
 
 Aucune donnée financière ni information d'authentification n'est transmise hors du portail.
 
+## Export des opérations
+
+Le bouton **Télécharger les opérations (CSV)** produit `AAAAMMJJ_BNRI_Transactions.csv` à partir de la réponse d'historique du portail. La période actuelle couvre les 24 derniers mois et comprend l'historique complet lorsque le compte a été ouvert pendant cette période.
+
+Le fichier est encodé en UTF-8, avec virgules comme séparateurs et dates `AAAA-MM-JJ`. Les colonnes communes sont `date,institution,compte,type,description,montant,devise,titre,quantite,prix_unitaire,frais,reference`. Les champs absents restent vides. Aucun gain ni rendement calculé n'est exporté.
+
 ## Validation locale
 
 Node.js 24 est utilisé dans les workflows.

@@ -111,6 +111,12 @@
   font-size: 18px;
 }
 
+#bnri-evolution-extension .be-header-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
 #bnri-evolution-extension .be-close {
   background: white;
   border: 1px solid var(--be-border);
@@ -318,6 +324,27 @@
 #bnri-evolution-extension .be-note {
   font-size: 12px;
   padding-top: 12px;
+}
+
+#bnri-evolution-extension .be-export {
+  align-items: center;
+  background: white;
+  border: 1px solid var(--be-border);
+  border-radius: 50%;
+  color: var(--be-blue);
+  cursor: pointer;
+  display: flex;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+#bnri-evolution-extension .be-export svg {
+  height: 19px;
+  width: 19px;
+}
+#bnri-evolution-extension .be-export:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 #bnri-evolution-extension .be-loading {
